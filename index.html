@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Retro Neon Clicker</title>
+  <style>
+    :root {
+      --neon-cyan: #00f0ff;
+      --neon-magenta: #ff007f;
+      --neon-purple: #9d4edd;
+      --bg-dark: #0a0915;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-dark);
+      color: #fff;
+      font-family: 'Courier New', Courier, monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* Professional Retro Header */
+    header {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--neon-cyan);
+      text-shadow: 0 0 10px var(--neon-cyan);
+    }
+
+    .score-container {
+      font-size: 32px;
+      font-weight: bold;
+      margin: 15px 0 5px 0;
+      color: var(--neon-magenta);
+      text-shadow: 0 0 10px var(--neon-magenta);
+    }
+
+    .gps-display {
+      font-size: 14px;
+      color: #888;
+      margin-bottom: 20px;
+    }
+
+    /* Main Clicker Zone */
+    .click-zone {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .main-cookie {
+      width: 180px;
+      height: 180px;
+      background: radial-gradient(circle, var(--neon-purple) 0%, #3c096c 100%);
+      border-radius: 50%;
+      border: 4px solid var(--neon-cyan);
+      box-shadow: 0 0 20px var(--neon-purple), inset 0 0 15px rgba(0,0,0,0.5);
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      font-size: 50px;
+      transition: transform 0.05s ease;
+      touch-action: manipulation;
+    }
+
+    .main-cookie:active {
+      transform: scale(0.92);
+      box-shadow: 0 0 35px var(--neon-cyan);
+    }
+
+    /* Upgrades/Shop Panel */
+    .shop-container {
+      width: 90%;
+      max-width: 380px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 2px solid var(--neon-purple);
+      border-radius: 12px;
+      padding: 15px;
+      box-sizing: border-box;
+      margin-bottom: 20px;
+    }
+
+    .shop-title {
+      font-size: 18px;
+      text-transform: uppercase;
+      color: var(--neon-cyan);
+      margin-top: 0;
+      margin-bottom: 15px;
+      border-bottom: 1px dashed var(--neon-purple);
+      padding-bottom: 5px;
+      text-align: center;
+    }
+
+    .upgrade-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .upgrade-item.available {
+      border-color: var(--neon-cyan);
+      background: rgba(0, 240, 255, 0.08);
+      cursor: pointer;
+    }
+
+    .upgrade-details {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .upgrade-name {
+      font-weight: bold;
+      font-size: 14px;
+      color: #fff;
+    }
+
+    .upgrade-effect {
+      font-size: 11px;
+      color: #aaa;
+      margin-top: 2px;
+    }
+
+    .upgrade-cost {
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--neon-magenta);
+    }
+
+    /* Floating Tap Text (+1 Effects) */
+    .floating-text {
+      position: absolute;
+      color: var(--neon-cyan);
+      font-weight: bold;
+      font-size: 24px;
+      pointer-events: none;
+      animation: floatUp 0.8s ease-out forwards;
+      text-shadow: 0 0 5px var(--neon-cyan);
+    }
+
+    @keyframes floatUp {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-80px) scale(0.8);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Neon Clicker</h1>
+    <div class="score-container" id="score-display">0</div>
+    <div class="gps-display" id="gps-display">Glows Per Second (GPS): 0</div>
+  </header>
+
+  <div class="click-zone">
+    <div class="main-cookie" id="clicker-btn" onclick="handleTap(event)">⚡</div>
+  </div>
+
+  <div class="shop-container">
+    <div class="shop-title">Upgrades Shop</div>
+    
+    <!-- Upgrade 1 -->
+    <div class="upgrade-item" id="up-clicker" onclick="buyUpgrade('clicker')">
+      <div class="upgrade-details">
+        <span class="upgrade-name">Auto-Tap Bot</span>
+        <span class="upgrade-effect" id="up-clicker-desc">Adds +0.5 GPS (0 Owned)</span>
+      </div>
+      <span class="upgrade-cost" id="up-clicker-cost">Cost: 15</span>
+    </div>
+
+    <!-- Upgrade 2 -->
+    <div class="upgrade-item" id="up-multiplier" onclick="buyUpgrade('multiplier')">
+      <div class="upgrade-details">
+        <span class="upgrade-name">Overdrive Engine</span>
+        <span class="upgrade-effect" id="up-multiplier-desc">Adds +4 GPS (0 Owned)</span>
+      </div>
+      <span class="upgrade-cost" id="up-multiplier-cost">Cost: 100</span>
+    </div>
+  </div>
+
+  <script>
+    // Game State variables
+    let score = 0;
+    let gps = 0;
+    let clickPower = 1;
+
+    const upgrades = {
+      clicker: { cost: 15, gpsIncrease: 0.5, owned: 0, costMultiplier: 1.15 },
+      multiplier: { cost: 100, gpsIncrease: 4.0, owned: 0, costMultiplier: 1.15 }
+    };
+
+    // Synthesized Audio Player (No files needed!)
+    function playBeep(frequency, duration) {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        oscillator.frequency.value = frequency;
+        oscillator.type = 'sine';
+
+        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
+
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + duration);
+      } catch(e) {
+        // Audio not allowed yet or unsupported
+      }
+    }
+
+    // Handle Taps on the Main Orb
+    function handleTap(event) {
+      score += clickPower;
+      updateUI();
+      playBeep(600, 0.1);
+
+      // Create beautiful floating text effect right where tap happened
+      const clickZone = document.querySelector('.click-zone');
+      const text = document.createElement('div');
+      text.className = 'floating-text';
+      text.innerText = `+${clickPower}`;
+      
+      // Basic positioning offset
+      text.style.left = `calc(50% - 10px)`;
+      text.style.top = `calc(50% - 20px)`;
+
+      clickZone.appendChild(text);
+
+      // Automatically clean up memory
+      setTimeout(() => text.remove(), 800);
+    }
+
+    // Buying upgrades
+    function buyUpgrade(id) {
+      const item = upgrades[id];
+      if (score >= item.cost) {
+        score -= item.cost;
+        item.owned++;
+        gps += item.gpsIncrease;
+        
+        // Scaled cost for professional progression progression
+        item.cost = Math.round(item.cost * item.costMultiplier);
+        
+        playBeep(880, 0.15);
+        updateUI();
+      }
+    }
+
+    // Keep UI Fresh and sync disabled states
+    function updateUI() {
+      document.getElementById('score-display').innerText = Math.floor(score);
+      document.getElementById('gps-display').innerText = `Glows Per Second (GPS): ${gps.toFixed(1)}`;
+
+      // Update shop items availability indicators
+      for (const key in upgrades) {
+        const item = upgrades[key];
+        const element = document.getElementById(`up-${key}`);
+        const costElement = document.getElementById(`up-${key}-cost`);
+        const descElement = document.getElementById(`up-${key}-desc`);
+
+        costElement.innerText = `Cost: ${item.cost}`;
+        
+        if (key === 'clicker') {
+          descElement.innerText = `Adds +0.5 GPS (${item.owned} Owned)`;
+        } else if (key === 'multiplier') {
+          descElement.innerText = `Adds +4 GPS (${item.owned} Owned)`;
+        }
+
+        if (score >= item.cost) {
+          element.classList.add('available');
+        } else {
+          element.classList.remove('available');
+        }
+      }
+    }
+
+    // Game loop running automatically every 10th of a second
+    setInterval(() => {
+      if (gps > 0) {
+        score += gps / 10;
+        updateUI();
+      }
+    }, 100);
+  </script>
+</body>
+</html>
